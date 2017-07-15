@@ -117,7 +117,8 @@ function setup() {
     var conn = new _sequelize2.default(MYSQL_DB, MYSQL_USER, MYSQL_PASS, { host: MYSQL_HOST, dialect: 'mysql', timezone: MYSQL_TZ });
     var defaults = {
       MYSQL_HOST: 'localhost',
-      MYSQL_TZ: IST
+      MYSQL_TZ: IST,
+      NODE_ENV: 'production'
     };
 
     var systemdFile = '\n[Unit]\nDescription=' + SERVER_NAME + '\nAfter=syslog.target\n\n[Service]\nWorkingDirectory=' + _env.root + '\nExecStart=/usr/local/bin/node --inspect server/index\nExecReload=/usr/bin/kill -HUP $MAINPID\nRestart=always\nStandardOutput=syslog\nStandardError=syslog\nSyslogIdentifier=' + SERVER_IDENTIFIER + '\nUser=' + SERVER_USER + '\nGroup=' + SERVER_GROUP + '\nEnvironmentFile=' + _env.root + '/.env\n\n[Install]\nWantedBy=multi-user.target';

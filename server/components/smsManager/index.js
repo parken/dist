@@ -20,9 +20,17 @@ var _promise = require('babel-runtime/core-js/promise');
 
 var _promise2 = _interopRequireDefault(_promise);
 
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
 var _moment = require('moment');
 
 var _moment2 = _interopRequireDefault(_moment);
+
+var _requestPromise = require('request-promise');
+
+var _requestPromise2 = _interopRequireDefault(_requestPromise);
 
 var _sqldb = require('../../conn/sqldb');
 
@@ -32,13 +40,15 @@ var _senderId = require('../../components/senderId');
 
 var _senderId2 = _interopRequireDefault(_senderId);
 
-var _requestPromise = require('request-promise');
+var _logger = require('../../components/logger');
 
-var _requestPromise2 = _interopRequireDefault(_requestPromise);
+var _logger2 = _interopRequireDefault(_logger);
 
 var _helper = require('../../conn/sqldb/helper');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var log = (0, _debug2.default)('components/smsManager');
 
 var SmsManager = {
   messageFly: { queue: [], processing: false },
@@ -56,6 +66,7 @@ var SmsManager = {
           text = message.MessageFly.text,
           sender = message.SenderId.name;
 
+      log('unicode, flash', unicode, flash);
       return (0, _requestPromise2.default)({
         method: 'POST',
         uri: 'http://sms.parkentechnology.com/httpapi/httpapi',
@@ -76,7 +87,7 @@ var SmsManager = {
         return SmsManager.processItem({ list: list, reject: true });
       });
     }
-    if (reject) return _promise2.default.reject("Rejecting on request");
+    if (reject) return _promise2.default.reject('Rejecting on request');
     return _promise2.default.resolve();
   },
   processOperatorSelection: function processOperatorSelection(_ref2) {
@@ -89,7 +100,7 @@ var SmsManager = {
 
     return _sqldb2.default.Upstream.findAll({ where: { routeId: routeId, balance: { $gt: 0 } } }).then(function (upstreams) {
       var upstreamMessageMap = {};
-      for (var i = 0; i < upstreams.length; i++) {
+      for (var i = 0; i < upstreams.length; i += 1) {
         var upstream = upstreams[i];
         if (upstream.balance >= list.length) {
           upstreamMessageMap[upstream.id] = list.splice(0, list.length);
@@ -112,7 +123,8 @@ var SmsManager = {
           var upstream = _sqldb2.default.Upstream.build({ id: upstreamId });
           return _promise2.default.all([_sqldb2.default.Message.update({ messageStatusId: 2, upstreamId: upstreamId }, { where: { id: id } }, { transaction: transaction }), _sqldb2.default.Transaction.create({
             upstreamId: upstreamId,
-            messageFlyId: messageFlyId, count: upstreamMessageMap[upstreamId].map(function (x) {
+            messageFlyId: messageFlyId,
+            count: upstreamMessageMap[upstreamId].map(function (x) {
               return x.id;
             }).length,
             transactionStatusId: 1
@@ -208,7 +220,7 @@ var SmsManager = {
             }) } });
       });
     })]).catch(function (err) {
-      return console.log('>>>>>>>>>>>>>>>>>>>>>>>>>', err);
+      return _logger2.default.error('addPendingMessagesToQueue', err);
     });
   },
   createBulkMessages: function createBulkMessages(_ref3) {
@@ -224,8 +236,17 @@ var SmsManager = {
         send = _ref3.send;
 
     return _sqldb2.default.Message.bulkCreate(list.map(function (number) {
-      return { number: number, messageFlyId: messageFlyId, messageStatusId: 1,
-        userId: userId, senderId: senderId, routeId: routeId, campaignId: campaignId, flash: flash, scheduledOn: scheduledOn, send: send, unicode: unicode
+      return { number: number,
+        messageFlyId: messageFlyId,
+        messageStatusId: 1,
+        userId: userId,
+        senderId: senderId,
+        routeId: routeId,
+        campaignId: campaignId,
+        flash: flash,
+        scheduledOn: scheduledOn,
+        send: send,
+        unicode: unicode
       };
     })).then(function (messages) {
       return send ? SmsManager.addToSmsQueue(messages) : _promise2.default.resolve();
@@ -341,12 +362,29 @@ var SmsManager = {
       }
       var send = senderIdStatusId === 2;
       return SmsManager.canSendSms({ userId: userId, resellerId: resellerId, routeId: routeId, count: list.length }).then(function () {
-        return _sqldb2.default.MessageFly.create({ text: text, numbers: numbers, groupIds: groupIds, total: list.length,
-          unicode: unicode, flash: flash, scheduledOn: scheduledOn, campaignId: campaignId, routeId: routeId, senderId: id, send: send });
-      }).then(function (messageFly) {
-        return SmsManager.createBulkMessages({ list: list, messageFlyId: messageFly.id,
-          userId: user.id, senderId: id, routeId: routeId, campaignId: campaignId, unicode: unicode, flash: flash, scheduledOn: scheduledOn,
+        return _sqldb2.default.MessageFly.create({ text: text,
+          numbers: numbers,
+          groupIds: groupIds,
+          total: list.length,
+          unicode: unicode,
+          flash: flash,
+          scheduledOn: scheduledOn,
+          campaignId: campaignId,
+          routeId: routeId,
+          senderId: id,
           send: send });
+      }).then(function (messageFly) {
+        return SmsManager.createBulkMessages({ list: list,
+          messageFlyId: messageFly.id,
+          userId: user.id,
+          senderId: id,
+          routeId: routeId,
+          campaignId: campaignId,
+          unicode: unicode,
+          flash: flash,
+          scheduledOn: scheduledOn,
+          send: send
+        });
       });
     });
   }

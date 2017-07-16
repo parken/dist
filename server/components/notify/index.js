@@ -133,7 +133,7 @@ function notifyOnUserChannel(_ref2) {
       var content = text.split(url);
       text = '' + content[0] + url + (url.includes('?') ? '&' : '?') + 'uuid=' + loginIdentifier.uuid + content[1];
     }
-    console.log(text);
+    log(text);
     if (user.slackActive && user.slackUrl) slack(text, user.slackUrl);
     if (user.smsActive) sms({ to: user.mobile, text: text });
   });

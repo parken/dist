@@ -134,8 +134,13 @@ var model = {
           latitude = _ll[0],
           longitude = _ll[1];
 
-      (0, _assign2.default)(session, { latitude: latitude, longitude: longitude, country: country, region: region,
-        city: city, metro: metro, zip: zip
+      (0, _assign2.default)(session, { latitude: latitude,
+        longitude: longitude,
+        country: country,
+        region: region,
+        city: city,
+        metro: metro,
+        zip: zip
       });
     }
 

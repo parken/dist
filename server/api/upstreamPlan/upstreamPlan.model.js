@@ -50,7 +50,7 @@ exports.default = function (sequelize, DataTypes) {
             routeId: upstream.routeId
           })]);
         }).catch(function (err) {
-          return console.log(err);
+          return _logger2.default.error(err);
         });
       }
     }
@@ -58,6 +58,10 @@ exports.default = function (sequelize, DataTypes) {
 
   return UpstreamPlan;
 };
+
+var _logger = require('../../components/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 //# sourceMappingURL=upstreamPlan.model.js.map

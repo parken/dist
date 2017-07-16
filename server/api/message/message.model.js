@@ -82,7 +82,7 @@ exports.default = function (sequelize, DataTypes) {
             return user.decrement((0, _defineProperty3.default)({}, (user.roleId === 4 ? 'selling' : 'sending') + 'Balance' + (0, _helper.getRouteType)(routeId), instances.length));
           })]);
         }).catch(function (err) {
-          return console.log(err);
+          return _logger2.default.err('message: afterBulkCreate', err);
         });
       }
     }
@@ -90,6 +90,10 @@ exports.default = function (sequelize, DataTypes) {
 
   return Message;
 };
+
+var _logger = require('../../components/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
 
 var _helper = require('../../conn/sqldb/helper');
 

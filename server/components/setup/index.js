@@ -52,7 +52,7 @@ var log = (0, _debug2.default)('components/setup');
 var IST = '+05:30';
 
 var offset = (0, _moment2.default)().utcOffset();
-var TZ = ''.concat(offset < 0 ? "-" : "+", (0, _moment2.default)(''.concat(Math.abs(offset / 60), Math.abs(offset % 60) < 10 ? "0" : "", Math.abs(offset % 60)), "hmm").format("HH:mm"));
+var TZ = ''.concat(offset < 0 ? '-' : '+', (0, _moment2.default)(''.concat(Math.abs(offset / 60), Math.abs(offset % 60) < 10 ? '0' : '', Math.abs(offset % 60)), "hmm").format('HH:mm'));
 
 function serveForm() {
   var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -72,8 +72,7 @@ function serveForm() {
       PORT: 'Application Port',
       SERVER_USER: 'SSH User',
       SERVER_USER_PASSWORD: 'SSH Password',
-      SERVER_GROUP: 'SSH User Group'
-    };
+      SERVER_GROUP: 'SSH User Group' };
     var numuricFields = ['PORT'];
     var timezones = [IST];
 

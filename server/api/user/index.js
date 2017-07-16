@@ -9,12 +9,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var express = require('express');
 var controller = require('./user.controller');
 
-
 var router = express.Router();
 
 router.get('/', (0, _auth2.default)(), controller.index);
 
-router.get('/wStates', (0, _auth2.default)(), controller.wStates);
 router.get('/me', (0, _auth2.default)(), controller.me);
 router.get('/duplicate', controller.duplicate);
 router.get('/checkExists', controller.checkExists);

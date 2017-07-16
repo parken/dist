@@ -4,7 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports.default = function (db) {
+exports.default = function (database) {
+  var db = database;
   db.RefreshToken = db.sequelize.import('./refreshToken.model');
   db.AccessToken = db.sequelize.import('./accessToken.model');
   db.App = db.sequelize.import('./app.model');

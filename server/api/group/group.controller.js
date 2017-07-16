@@ -16,7 +16,6 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function handleError(res, argStatusCode, err) {
-  console.log(err);
   _logger2.default.error('user.controller', err);
   var statusCode = argStatusCode || 500;
   res.status(statusCode).send(err);

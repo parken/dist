@@ -11,7 +11,6 @@ var express = require('express');
 var router = express.Router();
 var controller = require('./routes.controller');
 
-
 router.get('/', (0, _auth2.default)(), controller.index);
 
 // senderid 6/6 message
@@ -26,51 +25,63 @@ router.get('/', (0, _auth2.default)(), controller.index);
 // convert to csv link https://www.ablebits.com/office-addins-blog/2014/04/24/convert-excel-csv/
 // upload csv button
 // on csv file show 'File is selected'
-//Blacklist number
-/***
+// Blacklist number
+/** *
  * post blacklist number
  * get blacklists
  * delete blacklists/:id
  * download blacklists
  */
 router.get('/routes', function (req, res, next) {
+  return (
 
-  // req.user.id
-  return res.json({
-    sender_id: 'MANJSE',
-    routes: [{ id: 1, name: 'Transactional Route', balance: 50 }, { id: 2, name: 'Promotional Route', balance: 50 }, { id: 3, name: 'Sender ID Route', balance: 50 }, { id: 4, name: 'OTP', balance: 50 }]
-  });
+    // req.user.id
+    res.json({
+      sender_id: 'MANJSE',
+      routes: [{ id: 1, name: 'Transactional Route', balance: 50 }, { id: 2, name: 'Promotional Route', balance: 50 }, { id: 3, name: 'Sender ID Route', balance: 50 }, { id: 4, name: 'OTP', balance: 50 }]
+    })
+  );
 });
 
 router.get('/routes/:routeId/senderIds', function (req, res, next) {
-  // req.params.route_id
-  return res.json([{ name: 'HIDIGE' }]);
+  return (
+    // req.params.route_id
+    res.json([{ name: 'HIDIGE' }])
+  );
 });
 
 router.delete('/routes/:routeId/senderIds', function (req, res, next) {
-  // req.params.route_id
-  return res.json({});
+  return (
+    // req.params.route_id
+    res.json({})
+  );
 });
 
 router.get('/users/sign', function (req, res, next) {
-  // req.user.id
-  return res.json({ status: 0, text: '@Digender' });
+  return (
+    // req.user.id
+    res.json({ status: 0, text: '@Digender' })
+  );
 });
 
 router.post('/users/sign', function (req, res, next) {
-  // req.body.status | Boolean
-  // req.body.text | String
-  // req.user.id
-  return res.status(200).end();
+  return (
+    // req.body.status | Boolean
+    // req.body.text | String
+    // req.user.id
+    res.status(200).end()
+  );
 });
 
 router.post('/users/signStatus', function (req, res, next) {
-  // req.body.signStatus
-  // req.user.id
-  return res.status(200).end();
+  return (
+    // req.body.signStatus
+    // req.user.id
+    res.status(200).end()
+  );
 });
 
-/***
+/** *
  * Signature will affect your message credits by adding extra characters and space between SMS and signature.
  */
 
@@ -79,33 +90,34 @@ router.post('/sms1', function (req, res, next) {
     WEB: 1,
     MOBILE: 2,
     API: 3
-    /**
-     * req.body.route
-     * sender_id_
-     * mobile numbers(including csv file, group_id, mobilenumbers) (placeholder: Enter mobile numbers here
-     1234567890, 0123456789, 9012345678
-     8901234567
-     7890123456)
-     * unicode: false
-     * flash: false
-     * text: (placeholder: You are delivering crucial information. Keep it to-the-point.)
-     * campaingn_id || campaign_name
-     * sign: true
-     * duplicate:true if lastmessage == current message
-     * scheduled_on:  if route === promotional and 9 < currenttime > 9 throw error
-     *
-     */
-    // industry dnd check
-    // if user active continue
-    // if route === promotional and 9 < currenttime > 9 return Promotional route works on on day time
-    // packagemanager.check()
-    // lastmessage == current message retur err 400 message: last==current
-    // You messages exhaused. buy credits using http://parken.com/buy
-    // template.get().then
-    // messages.queue({ src: SOURCES.WEB })
-    // cutting.manipulate()
+  };
+  /**
+   * req.body.route
+   * sender_id_
+   * mobile numbers(including csv file, group_id, mobilenumbers) (placeholder: Enter mobile numbers here
+   1234567890, 0123456789, 9012345678
+   8901234567
+   7890123456)
+   * unicode: false
+   * flash: false
+   * text: (placeholder: You are delivering crucial information. Keep it to-the-point.)
+   * campaingn_id || campaign_name
+   * sign: true
+   * duplicate:true if lastmessage == current message
+   * scheduled_on:  if route === promotional and 9 < currenttime > 9 throw error
+   *
+   */
+  // industry dnd check
+  // if user active continue
+  // if route === promotional and 9 < currenttime > 9 return Promotional route works on on day time
+  // packagemanager.check()
+  // lastmessage == current message retur err 400 message: last==current
+  // You messages exhaused. buy credits using http://parken.com/buy
+  // template.get().then
+  // messages.queue({ src: SOURCES.WEB })
+  // cutting.manipulate()
 
-  };res.status(400).json({ message: 'Your Sender Id blacklisted. Please use a different sender id' });
+  res.status(400).json({ message: 'Your Sender Id blacklisted. Please use a different sender id' });
   return res.json({});
 });
 
@@ -118,7 +130,7 @@ router.get('/templates', function (req, res, next) {
   return res.json([{ id: 1, name: 'My First message' }, { id: 2, name: 'My Second message' }]);
 });
 
-//save draft
+// save draft
 router.post('/drafts', function (req, res, next) {
   return res.status(201).json({ message: 'Message Save to drafts successfully' });
 });

@@ -46,5 +46,7 @@ var all = {
 
 // Export the config object based on the NODE_ENV
 // ==============================================
-module.exports = _lodash2.default.merge(all, require('./shared'), env, require('./' + process.env.NODE_ENV + '.js') || {});
+module.exports = _lodash2.default.merge(all, require('./shared'), env,
+/* eslint import/no-dynamic-require:0 */
+require('./' + process.env.NODE_ENV + '.js') || {});
 //# sourceMappingURL=index.js.map

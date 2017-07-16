@@ -15,10 +15,10 @@ var _constants2 = _interopRequireDefault(_constants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var sms_types = _constants2.default.sms_types,
+var smsTypes = _constants2.default.smsTypes,
     routes = _constants2.default.routes;
-var PLAIN = sms_types.PLAIN,
-    UNICODE = sms_types.UNICODE;
+var PLAIN = smsTypes.PLAIN,
+    UNICODE = smsTypes.UNICODE;
 var PROMOTIONAL = routes.PROMOTIONAL,
     TRASACTIONAL = routes.TRASACTIONAL,
     SENDER_ID = routes.SENDER_ID,
@@ -180,7 +180,7 @@ var csvSMS = exports.csvSMS = {
         type: 'number',
         minimum: 7000000000,
         maximum: 9999999999
-        //pattern: '^[789]\\d{9},' pattern works with strings
+        // pattern: '^[789]\\d{9},' pattern works with strings
       }
     }
   }),

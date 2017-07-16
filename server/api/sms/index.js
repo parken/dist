@@ -9,7 +9,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var express = require('express');
 var controller = require('./sms.controller');
 
-
 var router = express.Router();
 
 router.get('/excel', controller.createExcel);

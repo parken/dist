@@ -8,7 +8,6 @@ var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
-exports.wStates = wStates;
 exports.me = me;
 exports.index = index;
 exports.show = show;
@@ -57,18 +56,9 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function handleError(res, argStatusCode, err) {
-  console.log(err);
   _logger2.default.error('user.controller', err);
   var statusCode = argStatusCode || 500;
   res.status(statusCode).send(err);
-}
-
-function wStates(req, res) {
-  return _sqldb2.default.WState.findAll({ attributes: ['id', 'name'], raw: true }).then(function (wS) {
-    return res.json(wS);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
 }
 
 function me(req, res) {
@@ -393,7 +383,10 @@ function addSellingRootUser(req, res) {
   if (!userId || !routeId || !limit || req.user.roleId !== 1) {
     return res.status(404).json({ message: 'Invalid Request.' });
   }
-  return _sqldb2.default.Selling.create({ userId: userId, routeId: routeId, limit: limit, createdBy: req.user.id,
+  return _sqldb2.default.Selling.create({ userId: userId,
+    routeId: routeId,
+    limit: limit,
+    createdBy: req.user.id,
     updatedBy: req.user.id }).then(function () {
     return res.status(202).end();
   }).catch(function (err) {
@@ -415,8 +408,13 @@ function addSelling(req, res) {
   if (req.user['sellingBalance' + (0, _helper.getRouteType)(routeId)] < limit) {
     return res.status(404).json({ message: 'Limit Exceeded.' });
   }
-  return _sqldb2.default.Selling.create({ userId: userId, sendingUserId: sendingUserId, routeId: routeId, limit: limit,
-    fromUserId: fromUserId || req.user.id, createdBy: req.user.id, updatedBy: req.user.id }).then(function () {
+  return _sqldb2.default.Selling.create({ userId: userId,
+    sendingUserId: sendingUserId,
+    routeId: routeId,
+    limit: limit,
+    fromUserId: fromUserId || req.user.id,
+    createdBy: req.user.id,
+    updatedBy: req.user.id }).then(function () {
     return res.status(202).end();
   }).catch(function (err) {
     return handleError(res, 500, err);

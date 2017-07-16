@@ -50,10 +50,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var sms_types = _constants2.default.sms_types,
+var smsTypes = _constants2.default.smsTypes,
     routes = _constants2.default.routes;
-var PLAIN = sms_types.PLAIN,
-    UNICODE = sms_types.UNICODE;
+var PLAIN = smsTypes.PLAIN,
+    UNICODE = smsTypes.UNICODE;
 var PROMOTIONAL = routes.PROMOTIONAL,
     TRASACTIONAL = routes.TRASACTIONAL,
     SENDER_ID = routes.SENDER_ID,
@@ -95,24 +95,23 @@ function create(req, res, next) {
     return res.status(400).status({ message: 'arguements missing. (route_id or message)' });
   }
 
-  // const validate = () => {
-  //   const ajv = new Ajv();
-  //   let current;
-  //   if(body.route_id === PROMOTIONAL) {
-  //     current = schema.promotionalSMS;
-  //   } else {
-  //     current = schema.anySMS;
-  //   }
-  //
-  //   ajv.addSchema(current, 'CurrentSchema');
-  //   ajv.validate('CurrentSchema', req.body);
-  //   return ajv.errorsText();
-  // };
-  //
-  // const err = validate(req.body);
-  //
-  // if (!err) return res.status(400).json({ message: err });
-  // return res.status(201).json({ id: 1 });
+  var validate = function validate() {
+    var ajv = new _ajv2.default();
+    var current = void 0;
+    if (req.body.route_id === PROMOTIONAL) {
+      current = schema.promotionalSMS;
+    } else {
+      current = schema.anySMS;
+    }
+
+    ajv.addSchema(current, 'CurrentSchema');
+    ajv.validate('CurrentSchema', req.body);
+    return ajv.errorsText();
+  };
+
+  var err = validate(req.body);
+
+  if (!err) return res.status(400).json({ message: err });
 
   var sendingTime = (scheduledOn ? new Date(scheduledOn) : new Date()).getHours();
 
@@ -120,8 +119,16 @@ function create(req, res, next) {
     return res.status(400).json({ message: 'Promotional SMS is allowed from 9AM to 9PM' });
   }
 
-  return _smsManager2.default.sendSms({ text: text, user: req.user, routeId: routeId, senderId: senderId, campaign: campaign, unicode: unicode,
-    flash: flash, scheduledOn: scheduledOn, numbers: numbers, groupIds: groupId }).then(function () {
+  return _smsManager2.default.sendSms({ text: text,
+    user: req.user,
+    routeId: routeId,
+    senderId: senderId,
+    campaign: campaign,
+    unicode: unicode,
+    flash: flash,
+    scheduledOn: scheduledOn,
+    numbers: numbers,
+    groupIds: groupId }).then(function () {
     return res.json({ message: 'Messages Sent.' });
   }).catch(next);
 }
@@ -155,8 +162,6 @@ function createExcel(req, res, next) {
       ws.cell(i + 2, 10).string(item.Campaign.name);
     });
     wb.write('Excel.xlsx', res);
-  }).catch(function (err) {
-    return console.log(err);
-  });
+  }).catch(next);
 }
 //# sourceMappingURL=sms.controller.js.map

@@ -9,7 +9,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var express = require('express');
 var controller = require('./senderId.controller');
 
-
 var router = express.Router();
 
 router.post('/', (0, _auth2.default)(), controller.create);

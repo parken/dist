@@ -21,7 +21,7 @@ exports.default = function (sequelize, DataTypes) {
       autoIncrement: true
     },
     name: DataTypes.STRING,
-    mobile: DataTypes.STRING,
+    mobile: DataTypes.INTEGER,
     email: DataTypes.STRING,
     otp: DataTypes.STRING,
     otpStatus: DataTypes.INTEGER,
@@ -31,7 +31,7 @@ exports.default = function (sequelize, DataTypes) {
     companyName: DataTypes.STRING,
     companyLogo: DataTypes.STRING,
     supportName: DataTypes.STRING,
-    supportMobile: DataTypes.STRING,
+    supportMobile: DataTypes.BIGINT,
     supportEmail: DataTypes.STRING,
     loginUrl: DataTypes.STRING,
     slackUrl: DataTypes.STRING,

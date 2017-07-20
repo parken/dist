@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.index = index;
+exports.create = create;
 
 var _logger = require('../../components/logger');
 
@@ -46,5 +47,14 @@ function index(req, res) {
   }).catch(function (err) {
     return handleError(res, 500, err);
   });
+}
+
+function create(req, res, next) {
+  var name = req.body.name;
+
+  if (!name) return res.status(500).json({ message: 'Invalid request' });
+  return _sqldb2.default.Group.create({ name: name, userId: req.user.id }).then(function (data) {
+    return res.json(data);
+  }).catch(next);
 }
 //# sourceMappingURL=group.controller.js.map

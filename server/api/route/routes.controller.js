@@ -25,8 +25,12 @@ function handleError(res, argStatusCode, err) {
 
 function index(req, res) {
   return _index4.default.Route.findAll().then(function (routes) {
-    return res.json(routes.filter(function (x) {
-      return req.user[(req.user.roleId === 4 ? 'selling' : 'sending') + 'Balance' + (0, _helper.getRouteType)(x.id)];
+    return res.json(routes.map(function (x) {
+      return x.toJSON();
+    }).filter(function (x) {
+      var route = x;
+      route.balance = req.user[(req.user.roleId === 4 ? 'selling' : 'sending') + 'Balance' + (0, _helper.getRouteType)(x.id)];
+      return route.balance;
     }));
   }).catch(function (err) {
     return handleError(res, 500, err);

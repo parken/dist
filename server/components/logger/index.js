@@ -37,7 +37,7 @@ var logger = new _winston2.default.Logger({
   })]
 });
 
-if (['development', 'test'].includes(_environment.NODE_ENV)) logger.add(_winston2.default.transports.Console);
+logger.add(_winston2.default.transports.Console);
 
 exports.default = logger;
 //# sourceMappingURL=index.js.map

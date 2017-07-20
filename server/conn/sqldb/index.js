@@ -34,7 +34,12 @@ var MYSQL_DB = _environment2.default.MYSQL_DB,
 
 
 var db = {
-  sequelize: new _sequelize2.default(MYSQL_DB, MYSQL_USER, MYSQL_PASS, { host: MYSQL_HOST, dialect: 'mysql', timezone: MYSQL_TZ, seederStorage: 'sequelize' })
+  sequelize: new _sequelize2.default(MYSQL_DB, MYSQL_USER, MYSQL_PASS, { host: MYSQL_HOST,
+    dialect: 'mysql',
+    timezone: MYSQL_TZ,
+    seederStorage: 'sequelize',
+    supportBigNumbers: true
+  })
 };
 
 db.User = db.sequelize.import('../../api/user/user.model');

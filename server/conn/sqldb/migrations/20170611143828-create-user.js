@@ -21,14 +21,8 @@ module.exports = {
         autoIncrement: true
       },
       name: DataTypes.STRING,
-      mobile: {
-        type: DataTypes.STRING(15),
-        unique: true
-      },
-      email: {
-        type: DataTypes.STRING(50),
-        unique: true
-      },
+      mobile: DataTypes.BIGINT,
+      email: DataTypes.STRING(50),
       transactionalStartFrom: DataTypes.INTEGER,
       transactionalPercent: DataTypes.INTEGER,
       promotionalStartFrom: DataTypes.INTEGER,
@@ -43,7 +37,7 @@ module.exports = {
         defaultValue: DataTypes.fn('NOW')
       },
       supportName: DataTypes.STRING,
-      supportMobile: DataTypes.STRING,
+      supportMobile: DataTypes.BIGINT,
       supportEmail: DataTypes.STRING,
       loginUrl: DataTypes.STRING,
       companyName: DataTypes.STRING,

@@ -110,9 +110,9 @@ var SmsManager = {
       }
       upstreamMessageMap[0] = list;
       return _sqldb2.default.sequelize.transaction().then(function (transaction) {
-        var promises = [_sqldb2.default.Message.update({ messageStatusId: 3 }, { where: { id: upstreamMessageMap[0].map(function (x) {
+        var promises = [upstreamMessageMap[0].length ? _sqldb2.default.Message.update({ messageStatusId: 3 }, { where: { id: upstreamMessageMap[0].map(function (x) {
               return x.id;
-            }) } }, { transaction: transaction })];
+            }) } }, { transaction: transaction }) : _promise2.default.resolve()];
         delete upstreamMessageMap[0];
         var messageIdAllocated = [];
         promises.push.apply(promises, (0, _toConsumableArray3.default)((0, _keys2.default)(upstreamMessageMap).map(function (upstreamId) {
@@ -121,14 +121,18 @@ var SmsManager = {
           });
           messageIdAllocated.push.apply(messageIdAllocated, (0, _toConsumableArray3.default)(id));
           var upstream = _sqldb2.default.Upstream.build({ id: upstreamId });
-          return _promise2.default.all([_sqldb2.default.Message.update({ messageStatusId: 2, upstreamId: upstreamId }, { where: { id: id } }, { transaction: transaction }), _sqldb2.default.Transaction.create({
-            upstreamId: upstreamId,
-            messageFlyId: messageFlyId,
-            count: upstreamMessageMap[upstreamId].map(function (x) {
-              return x.id;
-            }).length,
-            transactionStatusId: 1
-          }, { transaction: transaction }), upstream.decrement({ balance: id.length }, { transaction: transaction })]);
+          return _sqldb2.default.Message.update({ messageStatusId: 2, upstreamId: upstreamId }, { where: { id: id } }, { transaction: transaction }).then(function () {
+            return upstream.decrement({ balance: id.length }, { transaction: transaction });
+          }).then(function () {
+            return _sqldb2.default.Transaction.create({
+              upstreamId: upstreamId,
+              messageFlyId: messageFlyId,
+              count: upstreamMessageMap[upstreamId].map(function (x) {
+                return x.id;
+              }).length,
+              transactionStatusId: 1
+            }, { transaction: transaction });
+          });
         })));
         return _promise2.default.all(promises).then(function (data) {
           transaction.commit();
@@ -138,9 +142,7 @@ var SmsManager = {
           }).then(function (messages) {
             return SmsManager.processItem({ list: messages });
           }).then(function () {
-            return _promise2.default.resolve(data.splice(1, data.length).map(function (x) {
-              return x[1];
-            }));
+            return _promise2.default.resolve(data.splice(1, data.length));
           });
         }).then(function (transactions) {
           return _sqldb2.default.Transaction.update({ transactionStatusId: 2 }, { where: { id: transactions.map(function (x) {

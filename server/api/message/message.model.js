@@ -21,8 +21,8 @@ exports.default = function (sequelize, DataTypes) {
       autoIncrement: true
     },
     number: DataTypes.STRING,
-    unicode: DataTypes.INTEGER,
-    flash: DataTypes.INTEGER,
+    unicode: DataTypes.BOOLEAN,
+    flash: DataTypes.BOOLEAN,
     comment: DataTypes.STRING,
     scheduledOn: DataTypes.DATE,
     operatorOn: DataTypes.DATE,

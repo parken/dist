@@ -35,7 +35,7 @@ exports.default = function (a) {
   (0, _express4.default)(app);
   (0, _express6.default)(app, routes);
   // errors passed using next(err)
-  app.use(function (e, req, res) {
+  app.use(function (e, req, res, next) {
     var err = e;
     var body = req.body,
         headers = req.headers,

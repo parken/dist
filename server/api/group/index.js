@@ -12,6 +12,7 @@ var controller = require('./group.controller');
 var router = express.Router();
 
 router.get('/', (0, _auth2.default)(), controller.index);
+router.post('/', (0, _auth2.default)(), controller.create);
 
 module.exports = router;
 //# sourceMappingURL=index.js.map

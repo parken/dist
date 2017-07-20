@@ -55,43 +55,46 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function handleError(res, argStatusCode, err) {
-  _logger2.default.error('user.controller', err);
-  var statusCode = argStatusCode || 500;
-  res.status(statusCode).send(err);
-}
-
-function me(req, res) {
+function me(req, res, next) {
   return _sqldb2.default.User.findById(req.user.id, {
     attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin'],
     raw: 'true'
   }).then(function (u) {
     return res.json(u);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function index(req, res) {
+function index(req, res, next) {
   return _sqldb2.default.User.findAll().then(function (data) {
     return res.json(data);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function show(req, res) {
-  return _sqldb2.default.User.find({
-    where: { id: req.params.id },
-    attributes: ['id', 'name', 'email', 'mobile']
-  }).then(function (data) {
-    return res.json(data);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+function show(req, res, next) {
+  switch (req.user.roleId) {
+    case 1:
+    case 2:
+      {
+        return _sqldb2.default.User.find({
+          where: { id: req.params.id },
+          attributes: ['id', 'name', 'email', 'mobile', 'supportName', 'supportMobile', 'supportEmail', 'loginUrl']
+        }).then(function (data) {
+          return res.json(data);
+        }).catch(next);
+      }
+    default:
+      {
+        return _sqldb2.default.User.find({
+          where: { id: req.params.id },
+          attributes: ['id', 'name', 'email', 'mobile']
+        }).then(function (data) {
+          return res.json(data);
+        }).catch(next);
+      }
+  }
 }
 
-function showUuid(req, res) {
+function showUuid(req, res, next) {
   return _sqldb2.default.LoginIdentifier.find({
     where: { uuid: req.params.uuid },
     attributes: ['id'],
@@ -103,12 +106,10 @@ function showUuid(req, res) {
   }).then(function (loginIdentifier) {
     if (!loginIdentifier) return res.status(404).json({ message: 'Invalid Request' });
     return res.json(loginIdentifier.User);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function create(req, res) {
+function create(req, res, next) {
   var user = req.body;
   if (('' + user.mobile).length === 10) user.mobile += 910000000000;
   if (('' + user.supportMobile).length === 10) user.supportMobile += 910000000000;
@@ -116,12 +117,10 @@ function create(req, res) {
   user.createdBy = req.user.id;
   return _sqldb2.default.User.create(user).then(function (data) {
     return res.json(data);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function signup(req, res) {
+function signup(req, res, next) {
   var _req$body = req.body,
       id = _req$body.id,
       name = _req$body.name,
@@ -139,9 +138,7 @@ function signup(req, res) {
     });
     (0, _notify.slack)('Signup: ' + u.id + ', ' + u.name + ', ' + u.mobile + ', ' + u.email);
     return res.status(201).end();
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
 function getApp(code) {
@@ -150,7 +147,7 @@ function getApp(code) {
   });
 }
 
-function login(req, res) {
+function login(req, res, next) {
   var code = req.body.code;
 
   return (code ? getApp(code) : _sqldb2.default.App.findById(1, { raw: true })).then(function (app) {
@@ -175,7 +172,7 @@ function login(req, res) {
   });
 }
 
-function refresh(req, res) {
+function refresh(req, res, next) {
   return _sqldb2.default.App.find({
     include: [{
       model: _sqldb2.default.RefreshToken,
@@ -212,16 +209,14 @@ function logout(req, res, next) {
   }).catch(next);
 }
 
-function duplicate(req, res) {
+function duplicate(req, res, next) {
   var mobile = '91' + req.query.mobile;
   return _sqldb2.default.User.count({ where: { mobile: mobile } }).then(function (data) {
     return res.json({ mobile: !!data });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function update(req, res) {
+function update(req, res, next) {
   var id = req.user.id || req.params.id;
   var user = req.body;
   delete user.id;
@@ -234,21 +229,17 @@ function update(req, res) {
     }
   }).then(function () {
     return res.json({ id: id });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
 // Check email and phone exists
-function checkExists(req, res) {
+function checkExists(req, res, next) {
   return _sqldb2.default.User.checkExists(_sqldb2.default, req.query.email, req.query.mobile).then(function (status) {
     return res.json(status);
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function otpLogin(req, res) {
+function otpLogin(req, res, next) {
   return _sqldb2.default.User.findOrCreate({
     where: {
       mobile: req.body.username || req.body.mobile
@@ -273,12 +264,10 @@ function otpLogin(req, res) {
       return _logger2.default.error('user.ctrl/otp', err);
     });
     return res.json({ message: 'success', id: user.id, newUser: newUser });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function otpSend(req, res) {
+function otpSend(req, res, next) {
   _sqldb2.default.User.find({
     where: {
       $or: {
@@ -302,12 +291,10 @@ function otpSend(req, res) {
       return _logger2.default.error('user.ctrl/otp', err);
     });
     return res.json({ message: 'success', id: user.id });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function otpVerify(req, res) {
+function otpVerify(req, res, next) {
   _sqldb2.default.User.find({
     attributes: ['id'],
     where: {
@@ -320,13 +307,11 @@ function otpVerify(req, res) {
       return _logger2.default.error('user.ctrl/otpVerify', err);
     });
     return res.json({ message: 'success', id: user.id });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
 // Creates a new User in the DB
-function passwordChange(req, res) {
+function passwordChange(req, res, next) {
   return _sqldb2.default.User.find({
     where: {
       id: req.body.id,
@@ -348,12 +333,10 @@ function passwordChange(req, res) {
 
       return (0, _notify.slack)('Password change: ' + id + ', ' + name + ', ' + mobile + ', ' + email);
     });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function sendLogin(req, res) {
+function sendLogin(req, res, next) {
   return _sqldb2.default.User.find({ where: { id: req.params.id } }).then(function (user) {
     if (!user) return res.status(404).end();
     var otp = user.otpStatus === 1 && user.otp ? user.otp : Math.floor(Math.random() * 90000) + 10000;
@@ -365,16 +348,14 @@ function sendLogin(req, res) {
       return _logger2.default.error('user.ctrl/otp', err);
     });
     return res.json({ message: 'success', id: user.id });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function loginUid(req, res) {
+function loginUid(req, res, next) {
   return res.status(500).json({});
 }
 
-function addSellingRootUser(req, res) {
+function addSellingRootUser(req, res, next) {
   var _req$body2 = req.body,
       userId = _req$body2.userId,
       routeId = _req$body2.routeId,
@@ -389,12 +370,10 @@ function addSellingRootUser(req, res) {
     createdBy: req.user.id,
     updatedBy: req.user.id }).then(function () {
     return res.status(202).end();
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 
-function addSelling(req, res) {
+function addSelling(req, res, next) {
   var _req$body3 = req.body,
       userId = _req$body3.userId,
       sendingUserId = _req$body3.sendingUserId,
@@ -416,8 +395,6 @@ function addSelling(req, res) {
     createdBy: req.user.id,
     updatedBy: req.user.id }).then(function () {
     return res.status(202).end();
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+  }).catch(next);
 }
 //# sourceMappingURL=user.controller.js.map

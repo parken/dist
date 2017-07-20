@@ -60,7 +60,7 @@ var model = {
     });
   },
   getAccessToken: function getAccessToken(bearerToken, callback) {
-    _sqldb2.default.AccessToken.findOne({
+    return _sqldb2.default.AccessToken.findOne({
       where: { accessToken: bearerToken },
       attributes: ['accessToken', 'expires', ['sessionId', 'session_id']],
       include: [{

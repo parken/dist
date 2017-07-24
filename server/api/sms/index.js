@@ -13,7 +13,7 @@ var router = express.Router();
 
 router.get('/excel', controller.createExcel);
 router.get('/:id', controller.show);
-router.post('/', (0, _auth2.default)(), controller.create);
+router.post('/', _auth2.default, controller.create);
 
 module.exports = router;
 //# sourceMappingURL=index.js.map

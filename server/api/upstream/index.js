@@ -18,7 +18,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var router = _express2.default.Router();
 
-router.post('/:id/plan', (0, _auth2.default)(), controller.createPlan);
+router.post('/:id/plan', _auth2.default, controller.createPlan);
 
 module.exports = router;
 //# sourceMappingURL=index.js.map

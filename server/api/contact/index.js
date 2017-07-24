@@ -11,7 +11,7 @@ var controller = require('./contact.controller');
 
 var router = express.Router();
 
-router.post('/sync', (0, _auth2.default)(), controller.syncContact);
+router.post('/sync', _auth2.default, controller.syncContact);
 
 module.exports = router;
 //# sourceMappingURL=index.js.map

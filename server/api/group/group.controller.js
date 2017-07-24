@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.index = index;
 exports.create = create;
+exports.addEmailToGroup = addEmailToGroup;
 
 var _logger = require('../../components/logger');
 
@@ -56,5 +57,16 @@ function create(req, res, next) {
   return _sqldb2.default.Group.create({ name: name, userId: req.user.id }).then(function (data) {
     return res.json(data);
   }).catch(next);
+}
+
+function addEmailToGroup(req, res, next) {
+  return _sqldb2.default.Group.find({ where: { name: req.params.name } }).then(function (group) {
+    if (!group) return res.status(500).json({ message: 'no group found.' });
+    return _sqldb2.default.GroupEmail.findOrCreate({ where: { groupId: group.id, email: req.params.email } }).then(function () {
+      return res.status(202).end();
+    });
+  }).catch(function (err) {
+    return console.log(err);
+  });
 }
 //# sourceMappingURL=group.controller.js.map

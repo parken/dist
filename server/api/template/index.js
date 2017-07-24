@@ -11,6 +11,6 @@ var controller = require('./template.controller');
 
 var router = express.Router();
 
-router.get('/', (0, _auth2.default)(), controller.index);
+router.get('/', _auth2.default, controller.index);
 module.exports = router;
 //# sourceMappingURL=index.js.map

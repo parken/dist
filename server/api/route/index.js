@@ -11,7 +11,7 @@ var express = require('express');
 var router = express.Router();
 var controller = require('./routes.controller');
 
-router.get('/', (0, _auth2.default)(), controller.index);
+router.get('/', _auth2.default, controller.index);
 
 // senderid 6/6 message
 

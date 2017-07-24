@@ -16,6 +16,7 @@ exports.default = function (app) {
   app.use('/api/templates', _template2.default);
   app.use('/api/campaigns', _campaign2.default);
   app.use('/api/upstreams', _upstream2.default);
+  app.use('/api/messageFly', _messageFly2.default);
   app.use('/api', _route2.default);
 
   // All undefined asset or api routes should return a 404
@@ -74,6 +75,10 @@ var _upstream2 = _interopRequireDefault(_upstream);
 var _route = require('./api/route');
 
 var _route2 = _interopRequireDefault(_route);
+
+var _messageFly = require('./api/messageFly');
+
+var _messageFly2 = _interopRequireDefault(_messageFly);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 //# sourceMappingURL=routes.js.map

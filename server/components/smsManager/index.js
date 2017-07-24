@@ -370,6 +370,7 @@ var SmsManager = {
           total: list.length,
           unicode: unicode,
           flash: flash,
+          userId: userId,
           scheduledOn: scheduledOn,
           campaignId: campaignId,
           routeId: routeId,

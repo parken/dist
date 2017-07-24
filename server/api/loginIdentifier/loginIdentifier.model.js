@@ -14,7 +14,7 @@ exports.default = function (sequelize, DataTypes) {
     },
     uuid: DataTypes.STRING
   }, {
-    tableName: 'loginIdentifier',
+    tableName: 'login_identifier',
     timestamps: true,
     paranoid: true,
     classMethods: {

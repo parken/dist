@@ -183,10 +183,7 @@ var model = {
   getUser: function getUser(username, password, callback) {
     return _sqldb2.default.User.findOne({
       where: {
-        $or: {
-          mobile: username,
-          email: username
-        }
+        $and: [{ $or: { mobile: username, email: username } }, { $or: { password: _sqldb2.default.User.hashPassword(password), otp: password } }]
       },
       attributes: ['id', 'name', 'roleId', 'email', 'password', 'otp']
     }).then(function (user) {

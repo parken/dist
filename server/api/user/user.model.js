@@ -69,15 +69,12 @@ exports.default = function (sequelize, DataTypes) {
       revokeTokens: function revokeTokens(db) {
         var expires = new Date();
         return _promise2.default.all([db.AccessToken.update({ expires: expires }, { where: { userId: this.id } }), db.RefreshToken.update({ expires: expires }, { where: { userId: this.id } })]);
-      },
-      hashPassword: function hashPassword(password) {
-        return _crypto2.default.createHash('md5').update(salt + password).digest('hex');
       }
     },
 
     classMethods: {
       associate: function associate(db) {
-        User.belongsTo(db.Group, {
+        User.belongsTo(db.Role, {
           foreignKey: 'roleId'
         });
         User.belongsTo(User, {
@@ -111,6 +108,9 @@ exports.default = function (sequelize, DataTypes) {
 
           return { email: e, mobile: m };
         });
+      },
+      hashPassword: function hashPassword(password) {
+        return _crypto2.default.createHash('md5').update(salt + password).digest('hex');
       }
     },
     hooks: {

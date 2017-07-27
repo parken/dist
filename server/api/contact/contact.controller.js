@@ -46,7 +46,9 @@ function updateContacts(_ref) {
       }) : _sqldb2.default.Contact.create({ name: name, number: number, userId: userId });
     }).then(function (_ref2) {
       var contactId = _ref2.id;
-      return _sqldb2.default.GroupContact.findOrCreate({ where: { groupId: groupId, contactId: contactId } });
+      return _sqldb2.default.GroupContact.find({ where: { groupId: groupId, contactId: contactId } }).then(function (data) {
+        return data ? _promise2.default.resolve() : _sqldb2.default.GroupContact.create({ groupId: groupId, contactId: contactId });
+      });
     }).then(function () {
       return updateContacts({ contacts: contacts, userId: userId, groupId: groupId });
     }).catch(function () {
@@ -62,7 +64,7 @@ function syncContact(req, res) {
       contacts = _req$body.contacts;
 
   if (!name || !contacts) return res.status(500).json({ message: 'Invalid Request' });
-  return _sqldb2.default.Group.findOrCreate({ where: { name: name, userId: req.user.id } }).then(function (_ref3) {
+  _sqldb2.default.Group.findOrCreate({ where: { name: name, userId: req.user.id } }).then(function (_ref3) {
     var _ref4 = (0, _slicedToArray3.default)(_ref3, 1),
         group = _ref4[0];
 
@@ -70,7 +72,8 @@ function syncContact(req, res) {
   }).then(function () {
     return res.end();
   }).catch(function (err) {
-    return handleError(res, 500, err);
+    return console.log(err);
   });
+  return res.end();
 }
 //# sourceMappingURL=contact.controller.js.map

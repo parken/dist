@@ -8,11 +8,16 @@ var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 exports.me = me;
 exports.index = index;
 exports.show = show;
 exports.showUuid = showUuid;
 exports.create = create;
+exports.createCustomer = createCustomer;
 exports.signup = signup;
 exports.login = login;
 exports.refresh = refresh;
@@ -116,6 +121,19 @@ function create(req, res, next) {
   user.groupId = 2;
   user.createdBy = req.user.id;
   return _sqldb2.default.User.create(user).then(function (data) {
+    return res.json(data);
+  }).catch(next);
+}
+
+function createCustomer(req, res, next) {
+  var user = req.body;
+  user.roleId = 5;
+  user.createdBy = req.user.id;
+  user.otp = Math.floor(Math.random() * 90000) + 10000;
+  delete user.id;
+  return _sqldb2.default.User.find({ where: { email: user.email, createdBy: user.createdBy, roleId: user.roleId } }).then(function (data) {
+    return data ? _promise2.default.resolve(data) : _sqldb2.default.User.create(user);
+  }).then(function (data) {
     return res.json(data);
   }).catch(next);
 }

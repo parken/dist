@@ -18,6 +18,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var router = _express2.default.Router();
 
+router.get('/', _auth2.default, controller.index);
+router.get('/:id', _auth2.default, controller.show);
+
+router.post('/', _auth2.default, controller.create);
+router.post('/:id', _auth2.default, controller.update);
+router.put('/:id', _auth2.default, controller.update);
+router.post('/:id', _auth2.default, controller.destroy);
 router.post('/:id/plan', _auth2.default, controller.createPlan);
 
 module.exports = router;

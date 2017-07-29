@@ -38,12 +38,14 @@ function updateContacts(_ref) {
   var contact = contacts.shift();
   if (contact) {
     var name = contact.name,
-        number = contact.number;
+        number = contact.number,
+        email = contact.email,
+        birthday = contact.birthday;
 
     return _sqldb2.default.Contact.find({ where: { number: number, userId: userId } }).then(function (item) {
-      return item ? item.update({ name: name }).then(function () {
+      return item ? item.update({ name: name, email: email, birthday: birthday }).then(function () {
         return _promise2.default.resolve(item);
-      }) : _sqldb2.default.Contact.create({ name: name, number: number, userId: userId });
+      }) : _sqldb2.default.Contact.create({ name: name, number: number, userId: userId, email: email, birthday: birthday });
     }).then(function (_ref2) {
       var contactId = _ref2.id;
       return _sqldb2.default.GroupContact.find({ where: { groupId: groupId, contactId: contactId } }).then(function (data) {

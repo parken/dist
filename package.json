@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "main": "server/index.js",
   "dependencies": {
-    "ajv": "^5.2.2",
     "body-parser": "^1.13.3",
     "bowser": "^1.7.0",
     "composable-middleware": "^0.3.0",
@@ -156,5 +155,7 @@
     "lint": "gulp lint:scripts:server --fail"
   },
   "private": true,
-  "pre-commit": []
+  "pre-commit": [
+
+  ]
 }

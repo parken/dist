@@ -13,7 +13,9 @@ exports.default = function (sequelize, DataTypes) {
       autoIncrement: true
     },
     name: DataTypes.STRING,
-    number: DataTypes.STRING
+    number: DataTypes.STRING,
+    email: DataTypes.STRING,
+    birthday: DataTypes.STRING
   }, {
     tableName: 'contacts',
     timestamps: true,

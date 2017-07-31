@@ -197,7 +197,8 @@ var model = {
         return callback(null, verifiedUser);
       });
     }).catch(function (err) {
-      return callback(null, false, err);
+      console.log('sssssssssssssssss', err);
+      callback(null, false, err);
     });
   },
   saveRefreshToken: function saveRefreshToken(refreshToken, client, expires, user, sessionId, callback) {

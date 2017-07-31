@@ -22,6 +22,7 @@ router.get('/', _auth2.default, controller.index);
 router.get('/:id', _auth2.default, controller.show);
 
 router.post('/', _auth2.default, controller.create);
+router.post('/:id/activate', _auth2.default, controller.activate);
 router.post('/:id', _auth2.default, controller.update);
 router.put('/:id', _auth2.default, controller.update);
 router.post('/:id', _auth2.default, controller.destroy);

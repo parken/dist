@@ -23,7 +23,17 @@ exports.default = function (sequelize, DataTypes) {
     tableName: 'upstreams',
     timestamps: true,
     paranoid: true,
+    scopes: {
+      active: {
+        active: true
+      }
+    },
     classMethods: {
+      deactivateOtherRoutes: function deactivateOtherRoutes(db, _ref) {
+        var routeId = _ref.routeId;
+
+        return db.Upstream.update({ active: false }, { where: { routeId: routeId } });
+      },
       associate: function associate(db) {
         Upstream.belongsTo(db.User, {
           foreignKey: 'createdBy',

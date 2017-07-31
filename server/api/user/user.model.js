@@ -59,12 +59,15 @@ exports.default = function (sequelize, DataTypes) {
     timestamps: true,
     paranoid: true,
     instanceMethods: {
+      hashPassword: function hashPassword(password) {
+        return _crypto2.default.createHash('md5').update(salt + password).digest('hex');
+      },
       verifyPasswordAsync: function verifyPasswordAsync(password) {
         var hashedPass = _crypto2.default.createHash('md5').update(salt + password).digest('hex');
         return hashedPass === this.password ? _promise2.default.resolve(_lodash2.default.pick(this.toJSON(), ['id'])) : _promise2.default.reject({ code: 400, message: 'Check password!' });
       },
       verifyPassword: function verifyPassword(password, cb) {
-        return this.hashPassword(password) === this.password ? cb(null, this.toJSON()) : cb(null, false);
+        return User.hashPassword(password) === this.password ? cb(null, this.toJSON()) : cb(null, false);
       },
       revokeTokens: function revokeTokens(db) {
         var expires = new Date();

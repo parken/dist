@@ -4,6 +4,14 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+
 var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
@@ -32,6 +40,8 @@ var _environment = require('../../config/environment');
 
 var _environment2 = _interopRequireDefault(_environment);
 
+var _constants = require('../../config/constants');
+
 var _notify = require('../../components/notify');
 
 var _sqldb = require('../../conn/sqldb');
@@ -39,6 +49,9 @@ var _sqldb = require('../../conn/sqldb');
 var _sqldb2 = _interopRequireDefault(_sqldb);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var ADMIN = _constants.ROLES.ADMIN;
+
 
 function handleError(res, argStatusCode, err) {
   _logger2.default.error('user.controller', err);
@@ -106,38 +119,74 @@ function deleteSenderId(req, res) {
   });
 }
 
-function index(req, res) {
-  var _req$query = req.query,
-      status = _req$query.status,
-      fl = _req$query.fl;
+function index(req, res, next) {
+  if (req.user.roleId !== ADMIN) {
+    var _req$query = req.query,
+        status = _req$query.status,
+        _fl = _req$query.fl;
 
-  var promise = void 0;
-  if (req.user.admin === 2) {
-    promise = _promise2.default.resolve();
-  } else if (req.user.admin) {
-    promise = _sqldb2.default.User.findAll({ attributes: ['id'], where: { loginUrl: req.origin } });
-  } else {
-    promise = _promise2.default.resolve([req.user]);
+    var promise = void 0;
+    if (req.user.admin === 2) {
+      promise = _promise2.default.resolve();
+    } else if (req.user.admin) {
+      promise = _sqldb2.default.User.findAll({ attributes: ['id'], where: { loginUrl: req.origin } });
+    } else {
+      promise = _promise2.default.resolve([req.user]);
+    }
+    return promise.then(function (users) {
+      var where = { senderIdStatusId: { $not: 3 } };
+      if (users) where.createdBy = users.map(function (x) {
+        return x.id;
+      });
+      if (status) where.$and = { senderIdStatusId: status.split(',') };
+      return _sqldb2.default.SenderId.findAll({
+        attributes: _fl ? _fl.split(',') : ['id', 'name'],
+        where: where,
+        include: [{
+          model: _sqldb2.default.User,
+          as: 'CreatedBy',
+          attributes: ['id', 'name', 'admin']
+        }] }).then(function (data) {
+        return res.json(data);
+      });
+    }).catch(function (err) {
+      return handleError(res, 500, err);
+    });
   }
-  return promise.then(function (users) {
-    var where = { senderIdStatusId: { $not: 3 } };
-    if (users) where.createdBy = users.map(function (x) {
-      return x.id;
-    });
-    if (status) where.$and = { senderIdStatusId: status.split(',') };
-    return _sqldb2.default.SenderId.findAll({
-      attributes: fl ? fl.split(',') : ['id', 'name'],
-      where: where,
-      include: [{
-        model: _sqldb2.default.User,
-        as: 'CreatedBy',
-        attributes: ['id', 'name', 'admin']
-      }] }).then(function (data) {
-      return res.json(data);
-    });
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
+
+  var _req$query2 = req.query,
+      _req$query2$limit = _req$query2.limit,
+      limit = _req$query2$limit === undefined ? 20 : _req$query2$limit,
+      _req$query2$offset = _req$query2.offset,
+      offset = _req$query2$offset === undefined ? 0 : _req$query2$offset,
+      fl = _req$query2.fl,
+      where = _req$query2.where;
+
+
+  var options = {
+    attributes: fl ? fl.split(',') : ['id', 'routeId', 'limit', 'userId'],
+    limit: Number(limit),
+    offset: Number(offset)
+  };
+
+  if (where) {
+    options.where = where.split(',').reduce(function (nxt, x) {
+      var _x$split = x.split(':'),
+          _x$split2 = (0, _slicedToArray3.default)(_x$split, 2),
+          key = _x$split2[0],
+          value = _x$split2[1];
+
+      return (0, _assign2.default)(nxt, (0, _defineProperty3.default)({}, key, value));
+    }, {});
+  }
+
+  return _promise2.default.all([_sqldb2.default.Selling.findAll(options), _sqldb2.default.Selling.count()]).then(function (_ref) {
+    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
+        routes = _ref2[0],
+        numFound = _ref2[1];
+
+    return res.json({ items: routes, meta: { numFound: numFound } });
+  }).catch(next);
 }
 
 function show(req, res) {

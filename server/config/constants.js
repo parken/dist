@@ -1,9 +1,13 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = {
+module.exports = {
+  ROLES: {
+    ADMIN: 1,
+    RESELLER: 2,
+    SELLER: 3,
+    USER: 4,
+    CUSTOMER: 5
+  },
   routes: {
     PROMOTIONAL: 1,
     TRASACTIONAL: 2,

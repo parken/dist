@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
+
 var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
@@ -61,11 +65,15 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function me(req, res, next) {
-  return _sqldb2.default.User.findById(req.user.id, {
+  return _promise2.default.all([_sqldb2.default.User.findById(req.user.id, {
     attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin'],
     raw: 'true'
-  }).then(function (u) {
-    return res.json(u);
+  }), _sqldb2.default.Route.findAll()]).then(function (_ref) {
+    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
+        u = _ref2[0],
+        upstreams = _ref2[1];
+
+    return res.json((0, _assign2.default)(u, { upstreams: upstreams }));
   }).catch(next);
 }
 
@@ -263,10 +271,10 @@ function otpLogin(req, res, next) {
       mobile: req.body.username || req.body.mobile
     },
     attributes: ['id', 'otpStatus', 'otp', 'mobile']
-  }).then(function (_ref) {
-    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
-        user = _ref2[0],
-        newUser = _ref2[1];
+  }).then(function (_ref3) {
+    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
+        user = _ref4[0],
+        newUser = _ref4[1];
 
     if (!user) {
       return res.status(400).json({
@@ -384,7 +392,7 @@ function addSellingRootUser(req, res, next) {
   }
   return _sqldb2.default.Selling.create({ userId: userId,
     routeId: routeId,
-    limit: limit,
+    limit: Number(limit),
     createdBy: req.user.id,
     updatedBy: req.user.id }).then(function () {
     return res.status(202).end();
@@ -408,7 +416,7 @@ function addSelling(req, res, next) {
   return _sqldb2.default.Selling.create({ userId: userId,
     sendingUserId: sendingUserId,
     routeId: routeId,
-    limit: limit,
+    limit: Number(limit),
     fromUserId: fromUserId || req.user.id,
     createdBy: req.user.id,
     updatedBy: req.user.id }).then(function () {

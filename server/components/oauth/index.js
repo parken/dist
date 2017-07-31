@@ -9,6 +9,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 module.exports = require('oauth2-server')({
   model: _model2.default,
   grants: ['authorization_code', 'password', 'refresh_token'],
-  debug: true
+  debug: false
 });
 //# sourceMappingURL=index.js.map

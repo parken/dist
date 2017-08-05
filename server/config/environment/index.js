@@ -41,12 +41,15 @@ var all = {
   MYSQL_USER: process.env.MYSQL_USER,
   MYSQL_PASS: process.env.MYSQL_PASS,
   MYSQL_HOST: process.env.MYSQL_HOST,
-  MYSQL_TZ: '+05:30'
+  MYSQL_TZ: '+05:30',
+
+  OAUTH_SERVER: process.env.OAUTH_SERVER,
+  OAUTH_ENDPOINT: process.env.OAUTH_ENDPOINT
 };
 
 // Export the config object based on the NODE_ENV
 // ==============================================
-module.exports = _lodash2.default.merge(all, require('./shared'), env,
+module.exports = _lodash2.default.merge(all, require('./shared'), env.parsed || env,
 /* eslint import/no-dynamic-require:0 */
 require('./' + process.env.NODE_ENV + '.js') || {});
 //# sourceMappingURL=index.js.map

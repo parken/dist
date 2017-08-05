@@ -21,6 +21,7 @@ var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
 exports.index = index;
+exports.create = create;
 
 var _index = require('../../components/logger/index');
 
@@ -44,7 +45,7 @@ function index(req, res, next) {
 
   var options = {
     where: {},
-    attributes: fl ? fl.split(',') : ['id'],
+    attributes: fl ? fl.split(',') : ['id', 'count'],
     limit: Number(limit),
     offset: Number(offset)
   };
@@ -68,6 +69,20 @@ function index(req, res, next) {
         numFound = _ref2[1];
 
     return res.json({ items: upstreams, meta: { numFound: numFound } });
+  }).catch(next);
+}
+
+function create(req, res, next) {
+  var count = req.body.count;
+
+  if (!count || req.user.roleId !== 1) return res.status(400).json({ message: 'Invalid Request' });
+  return _index4.default.UpstreamPlan.create({
+    upstreamId: req.params.id,
+    createdBy: req.user.id,
+    updatedBy: req.user.id,
+    count: count
+  }).then(function () {
+    return res.status(202).end();
   }).catch(next);
 }
 //# sourceMappingURL=upstreamPlan.controller.js.map

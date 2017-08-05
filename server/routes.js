@@ -28,6 +28,7 @@ exports.default = function (app) {
   app.use('/api/sending', _sending2.default);
   app.use('/api/credits', _selling2.default);
   app.use('/api/sessions', _session2.default);
+  app.use('/api/domains', _domain2.default);
 
   // All undefined asset or api routes should return a 404
   app.route('/:url(api|auth|components|app|bower_components|assets)/*').get(_errors2.default[404]);
@@ -129,6 +130,10 @@ var _sending2 = _interopRequireDefault(_sending);
 var _session = require('./api/session');
 
 var _session2 = _interopRequireDefault(_session);
+
+var _domain = require('./api/domain');
+
+var _domain2 = _interopRequireDefault(_domain);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 //# sourceMappingURL=routes.js.map

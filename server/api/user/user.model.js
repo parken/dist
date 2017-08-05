@@ -29,6 +29,7 @@ exports.default = function (sequelize, DataTypes) {
     active: DataTypes.BOOLEAN,
     admin: DataTypes.INTEGER,
     companyName: DataTypes.STRING,
+    companyAddress: DataTypes.STRING,
     companyLogo: DataTypes.STRING,
     supportName: DataTypes.STRING,
     supportMobile: DataTypes.BIGINT,
@@ -77,8 +78,12 @@ exports.default = function (sequelize, DataTypes) {
 
     classMethods: {
       associate: function associate(db) {
+        this.db = db;
         User.belongsTo(db.Role, {
           foreignKey: 'roleId'
+        });
+        User.belongsTo(db.App, {
+          foreignKey: 'appId'
         });
         User.belongsTo(User, {
           foreignKey: 'createdBy',
@@ -119,7 +124,7 @@ exports.default = function (sequelize, DataTypes) {
     hooks: {
       beforeCreate: function beforeCreate(instance) {
         if (instance.changed('password')) {
-          instance.set('password', instance.hashPassword(instance.password));
+          instance.set('password', this.db.User.hashPassword(instance.password));
         }
       },
       beforeUpdate: function beforeUpdate(instance) {

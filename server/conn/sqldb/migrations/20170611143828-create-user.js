@@ -41,6 +41,7 @@ module.exports = {
       supportEmail: DataTypes.STRING,
       loginUrl: DataTypes.STRING,
       companyName: DataTypes.STRING,
+      companyAddress: DataTypes.STRING,
       companyLogo: DataTypes.STRING,
       admin: DataTypes.INTEGER,
       otp: DataTypes.STRING,
@@ -58,7 +59,8 @@ module.exports = {
       sendingBalanceSenderId: { type: DataTypes.INTEGER, defaultValue: 0 },
       sellingBalanceOTP: { type: DataTypes.INTEGER, defaultValue: 0 },
       sendingBalanceOTP: { type: DataTypes.INTEGER, defaultValue: 0 },
-      roleId: keys('roles')
+      roleId: keys('roles'),
+      appId: keys('apps')
     }, timestamps(3)), engine).then(function () {
       return queryInterface.addColumn('users', 'createdBy', keys('users'));
     }).then(function () {

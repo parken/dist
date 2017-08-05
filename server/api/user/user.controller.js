@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
@@ -23,6 +27,7 @@ exports.showUuid = showUuid;
 exports.create = create;
 exports.createCustomer = createCustomer;
 exports.signup = signup;
+exports.googleLogin = googleLogin;
 exports.login = login;
 exports.refresh = refresh;
 exports.logout = logout;
@@ -41,6 +46,10 @@ exports.addSelling = addSelling;
 var _request = require('request');
 
 var _request2 = _interopRequireDefault(_request);
+
+var _requestPromise = require('request-promise');
+
+var _requestPromise2 = _interopRequireDefault(_requestPromise);
 
 var _environment = require('../../config/environment');
 
@@ -66,7 +75,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function me(req, res, next) {
   return _promise2.default.all([_sqldb2.default.User.findById(req.user.id, {
-    attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin'],
+    attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin', 'companyName', 'companyAddress', 'supportName', 'supportMobile', 'supportEmail'],
     raw: 'true'
   }), _sqldb2.default.Route.findAll()]).then(function (_ref) {
     var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
@@ -78,8 +87,38 @@ function me(req, res, next) {
 }
 
 function index(req, res, next) {
-  return _sqldb2.default.User.findAll().then(function (data) {
-    return res.json(data);
+  var _req$query = req.query,
+      _req$query$limit = _req$query.limit,
+      limit = _req$query$limit === undefined ? 20 : _req$query$limit,
+      _req$query$offset = _req$query.offset,
+      offset = _req$query$offset === undefined ? 0 : _req$query$offset,
+      fl = _req$query.fl,
+      where = _req$query.where;
+
+
+  var options = {
+    attributes: fl ? fl.split(',') : ['id'],
+    limit: Number(limit),
+    offset: Number(offset)
+  };
+
+  if (where) {
+    options.where = where.split(',').reduce(function (nxt, x) {
+      var _x$split = x.split(':'),
+          _x$split2 = (0, _slicedToArray3.default)(_x$split, 2),
+          key = _x$split2[0],
+          value = _x$split2[1];
+
+      return (0, _assign2.default)(nxt, (0, _defineProperty3.default)({}, key, value));
+    }, {});
+  }
+
+  return _promise2.default.all([_sqldb2.default.User.findAll(options), _sqldb2.default.User.count()]).then(function (_ref3) {
+    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
+        users = _ref4[0],
+        numFound = _ref4[1];
+
+    return res.json({ items: users, meta: { numFound: numFound } });
   }).catch(next);
 }
 
@@ -89,8 +128,7 @@ function show(req, res, next) {
     case 2:
       {
         return _sqldb2.default.User.find({
-          where: { id: req.params.id },
-          attributes: ['id', 'name', 'email', 'mobile', 'supportName', 'supportMobile', 'supportEmail', 'loginUrl']
+          where: { id: req.params.id }
         }).then(function (data) {
           return res.json(data);
         }).catch(next);
@@ -124,9 +162,9 @@ function showUuid(req, res, next) {
 
 function create(req, res, next) {
   var user = req.body;
-  if (('' + user.mobile).length === 10) user.mobile += 910000000000;
-  if (('' + user.supportMobile).length === 10) user.supportMobile += 910000000000;
-  user.groupId = 2;
+  if (('' + user.mobile).length === 10) user.mobile = Number('91' + user.mobile);
+  if (('' + user.supportMobile).length === 10) user.supportMobile = Number('91' + user.supportMobile);
+  user.roleId = user.roldeId || 2;
   user.createdBy = req.user.id;
   return _sqldb2.default.User.create(user).then(function (data) {
     return res.json(data);
@@ -147,29 +185,83 @@ function createCustomer(req, res, next) {
 }
 
 function signup(req, res, next) {
-  var _req$body = req.body,
-      id = _req$body.id,
-      name = _req$body.name,
-      password = _req$body.password,
-      otp = _req$body.otp,
-      email = _req$body.email;
+  var authorization = req.get('authorization');
+  if (!authorization) return res.status(404).json({ message: 'Unauthorized Access.' });
 
-  _sqldb2.default.User.find({
-    attributes: ['id'],
-    where: { id: id, otp: otp }
-  }).then(function (u) {
-    if (!u) return res.status(400).json({ error_description: 'Invalid OTP' });
-    u.update({ otpStatus: 0, name: name, password: password, email: email }).catch(function (err) {
-      return _logger2.default.error('user.ctrl/otpVerify', err);
+  var _Buffer$from$toString = Buffer.from(authorization.split(' ')[1], 'base64').toString('ascii').split(':'),
+      _Buffer$from$toString2 = (0, _slicedToArray3.default)(_Buffer$from$toString, 2),
+      clientId = _Buffer$from$toString2[0],
+      clientSecret = _Buffer$from$toString2[1];
+
+  return _sqldb2.default.App.find({ attributes: ['id'], where: { clientId: clientId, clientSecret: clientSecret } }).then(function (app) {
+    if (!app) return res.status(500).json({ message: 'Invalid Authentication.' });
+    var _req$body = req.body,
+        name = _req$body.name,
+        email = _req$body.email,
+        mobile = _req$body.mobile;
+    var roleId = req.body.roleId;
+
+    if (!roleId) roleId = 4;
+    var password = req.body.password;
+
+    var otp = Math.floor(Math.random() * 90000) + 10000;
+    if (!password) password = otp;
+    var where = { $or: [], appId: app.id };
+    if (email) where.$or.push({ email: email });
+    if (mobile) where.$or.push({ mobile: mobile });
+    return _sqldb2.default.User.find({ where: where }).then(function (user) {
+      return user ? res.status(409).end() : _sqldb2.default.User.create({ name: name, email: email, mobile: mobile, otp: otp, password: password, appId: app.id, roleId: roleId }).then(function () {
+        return res.end();
+      });
     });
-    (0, _notify.slack)('Signup: ' + u.id + ', ' + u.name + ', ' + u.mobile + ', ' + u.email);
-    return res.status(201).end();
   }).catch(next);
 }
 
 function getApp(code) {
   return _sqldb2.default.AuthCode.find({ where: { auth_code: code }, include: [_sqldb2.default.App] }).then(function (authCode) {
     return authCode.App.toJSON();
+  });
+}
+
+function googleLogin(req, res, next) {
+  var authorization = req.get('authorization');
+  if (!authorization) return res.status(404).json({ message: 'Unauthorized Access.' });
+
+  var _Buffer$from$toString3 = Buffer.from(authorization.split(' ')[1], 'base64').toString('ascii').split(':'),
+      _Buffer$from$toString4 = (0, _slicedToArray3.default)(_Buffer$from$toString3, 2),
+      clientId = _Buffer$from$toString4[0],
+      clientSecret = _Buffer$from$toString4[1];
+
+  return _sqldb2.default.App.find({ attributes: ['id', 'clientId', 'clientSecret'], where: { clientId: clientId, clientSecret: clientSecret } }).then(function (app) {
+    if (!app) return res.status(500).json({ message: 'Invalid Authentication.' });
+    var email = req.body.email;
+
+    return _sqldb2.default.User.find({ attributes: ['email', 'otp'], where: { email: email, appId: app.id } }).then(function (user) {
+      if (!user) return res.status(500).json({ message: 'user not found' });
+      var options = {
+        method: 'POST',
+        uri: '' + _environment2.default.OAUTH_SERVER + _environment2.default.OAUTH_ENDPOINT,
+        auth: {
+          user: app.clientId,
+          pass: app.clientSecret
+        },
+        headers: {
+          'user-agent': req.headers['user-agent'],
+          'x-forwarded-for': req.headers['x-forwarded-for'] || req.connection.remoteAddress
+        },
+        form: {
+          grant_type: 'password',
+          username: user.email,
+          password: user.otp
+        },
+        json: true
+      };
+      return (0, _requestPromise2.default)(options).then(function (data) {
+        return res.json(data);
+      });
+    });
+  }).catch(function (err) {
+    return console.log(err);
   });
 }
 
@@ -246,14 +338,7 @@ function update(req, res, next) {
   var id = req.user.id || req.params.id;
   var user = req.body;
   delete user.id;
-  if (req.user.id) {
-    delete user.alternateMobile;
-  }
-  return _sqldb2.default.User.update(user, {
-    where: {
-      id: id
-    }
-  }).then(function () {
+  return _sqldb2.default.User.update(user, { where: { id: id } }).then(function () {
     return res.json({ id: id });
   }).catch(next);
 }
@@ -271,10 +356,10 @@ function otpLogin(req, res, next) {
       mobile: req.body.username || req.body.mobile
     },
     attributes: ['id', 'otpStatus', 'otp', 'mobile']
-  }).then(function (_ref3) {
-    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
-        user = _ref4[0],
-        newUser = _ref4[1];
+  }).then(function (_ref5) {
+    var _ref6 = (0, _slicedToArray3.default)(_ref5, 2),
+        user = _ref6[0],
+        newUser = _ref6[1];
 
     if (!user) {
       return res.status(400).json({

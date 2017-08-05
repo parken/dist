@@ -26,7 +26,6 @@ exports.create = create;
 exports.activate = activate;
 exports.update = update;
 exports.destroy = destroy;
-exports.createPlan = createPlan;
 
 var _index = require('../../components/logger/index');
 
@@ -116,21 +115,5 @@ function destroy(req, res, next) {
   return _index4.default.Upstream.destory({ where: { id: req.params.id } }).then(function () {
     return res.status(201).end();
   }).catch(next);
-}
-
-function createPlan(req, res) {
-  var count = req.body.count;
-
-  if (!count || req.user.roleId !== 1) return res.status(404).json({ message: 'Invalid Request' });
-  return _index4.default.UpstreamPlan.create({
-    upstreamId: req.params.id,
-    createdBy: req.user.id,
-    updatedBy: req.user.id,
-    count: count
-  }).then(function () {
-    return res.status(202).end();
-  }).catch(function (err) {
-    return handleError(res, 500, err);
-  });
 }
 //# sourceMappingURL=upstream.controller.js.map

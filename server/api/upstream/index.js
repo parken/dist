@@ -26,7 +26,6 @@ router.post('/:id/activate', _auth2.default, controller.activate);
 router.post('/:id', _auth2.default, controller.update);
 router.put('/:id', _auth2.default, controller.update);
 router.post('/:id', _auth2.default, controller.destroy);
-router.post('/:id/plan', _auth2.default, controller.createPlan);
 
 module.exports = router;
 //# sourceMappingURL=index.js.map

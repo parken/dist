@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
@@ -15,10 +19,6 @@ var _assign2 = _interopRequireDefault(_assign);
 var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
-
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
 
 exports.me = me;
 exports.index = index;
@@ -74,15 +74,11 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function me(req, res, next) {
-  return _promise2.default.all([_sqldb2.default.User.findById(req.user.id, {
-    attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin', 'companyName', 'companyAddress', 'supportName', 'supportMobile', 'supportEmail'],
+  return _sqldb2.default.User.findById(req.user.id, {
+    attributes: ['mobile', 'email', 'name', 'id', 'roleId'],
     raw: 'true'
-  }), _sqldb2.default.Route.findAll()]).then(function (_ref) {
-    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
-        u = _ref2[0],
-        upstreams = _ref2[1];
-
-    return res.json((0, _assign2.default)(u, { upstreams: upstreams }));
+  }).then(function (u) {
+    return res.json(u);
   }).catch(next);
 }
 
@@ -113,10 +109,10 @@ function index(req, res, next) {
     }, {});
   }
 
-  return _promise2.default.all([_sqldb2.default.User.findAll(options), _sqldb2.default.User.count()]).then(function (_ref3) {
-    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
-        users = _ref4[0],
-        numFound = _ref4[1];
+  return _promise2.default.all([_sqldb2.default.User.findAll(options), _sqldb2.default.User.count()]).then(function (_ref) {
+    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
+        users = _ref2[0],
+        numFound = _ref2[1];
 
     return res.json({ items: users, meta: { numFound: numFound } });
   }).catch(next);
@@ -356,10 +352,10 @@ function otpLogin(req, res, next) {
       mobile: req.body.username || req.body.mobile
     },
     attributes: ['id', 'otpStatus', 'otp', 'mobile']
-  }).then(function (_ref5) {
-    var _ref6 = (0, _slicedToArray3.default)(_ref5, 2),
-        user = _ref6[0],
-        newUser = _ref6[1];
+  }).then(function (_ref3) {
+    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
+        user = _ref4[0],
+        newUser = _ref4[1];
 
     if (!user) {
       return res.status(400).json({

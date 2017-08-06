@@ -65,7 +65,7 @@ var model = {
       attributes: ['accessToken', 'expires', ['sessionId', 'session_id']],
       include: [{
         model: _sqldb2.default.User,
-        attributes: ['id', 'name', 'roleId', 'admin', 'resellerId', 'sellingBalanceTransactional', 'sendingBalanceTransactional', 'sellingBalancePromotional', 'sendingBalancePromotional', 'sellingBalanceSenderId', 'sendingBalanceSenderId', 'sellingBalanceOTP', 'sendingBalanceOTP']
+        attributes: ['id', 'name', 'roleId']
       }]
     }).then(function (accessToken) {
       if (!accessToken) return callback(null, false);
@@ -197,7 +197,6 @@ var model = {
         return callback(null, verifiedUser);
       });
     }).catch(function (err) {
-      console.log('sssssssssssssssss', err);
       callback(null, false, err);
     });
   },

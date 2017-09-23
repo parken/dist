@@ -49,7 +49,7 @@ db.App = db.sequelize.import('../../components/oauth/sequelize/app.model');
 db.AuthCode = db.sequelize.import('../../components/oauth/sequelize/authCode.model');
 db.Session = db.sequelize.import('../../components/oauth/sequelize/session.model');
 
-['Role', 'Shipment', 'InShipment', 'Address'].forEach(function (model) {
+['Group', 'SenderIdStatus', 'SenderId', 'Route', 'Upstream', 'LoginIdentifier', 'Contact', 'MessageStatus', 'Message', 'PackageType', 'UserPackage', 'Transaction', 'PriorityNumber', 'Group', 'GroupContact', 'Campaign', 'Template', 'MessageFly', 'Selling', 'Sending', 'TransactionStatus', 'UpstreamPlan', 'GroupEmail', 'Role', 'DomainType', 'Domain'].forEach(function (model) {
   return db[model] = db.sequelize.import('../../api/' + _lodash2.default.camelCase(model) + '/' + _lodash2.default.camelCase(model) + '.model');
 });
 

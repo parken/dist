@@ -23,10 +23,39 @@ exports.default = function (sequelize, DataTypes) {
     name: DataTypes.STRING,
     mobile: DataTypes.INTEGER,
     email: DataTypes.STRING,
+    signature: DataTypes.STRING,
     otp: DataTypes.STRING,
     otpStatus: DataTypes.INTEGER,
     password: DataTypes.STRING,
-    active: DataTypes.BOOLEAN
+    active: DataTypes.BOOLEAN,
+    admin: DataTypes.INTEGER,
+    companyName: DataTypes.STRING,
+    companyAddress: DataTypes.STRING,
+    companyLogo: DataTypes.STRING,
+    supportName: DataTypes.STRING,
+    supportMobile: DataTypes.BIGINT,
+    supportEmail: DataTypes.STRING,
+    loginUrl: DataTypes.STRING,
+    slackUrl: DataTypes.STRING,
+    slackActive: DataTypes.BOOLEAN,
+    smsActive: DataTypes.BOOLEAN,
+    transactionalStartFrom: DataTypes.INTEGER,
+    transactionalPercent: DataTypes.INTEGER,
+    promotionalStartFrom: DataTypes.INTEGER,
+    promotionalPercent: DataTypes.INTEGER,
+    otpStartFrom: DataTypes.INTEGER,
+    otpPercent: DataTypes.INTEGER,
+    senderIdStartFrom: DataTypes.INTEGER,
+    senderIdPercent: DataTypes.INTEGER,
+    expiresAt: DataTypes.DATE,
+    sellingBalanceTransactional: DataTypes.INTEGER,
+    sendingBalanceTransactional: DataTypes.INTEGER,
+    sellingBalancePromotional: DataTypes.INTEGER,
+    sendingBalancePromotional: DataTypes.INTEGER,
+    sellingBalanceSenderId: DataTypes.INTEGER,
+    sendingBalanceSenderId: DataTypes.INTEGER,
+    sellingBalanceOTP: DataTypes.INTEGER,
+    sendingBalanceOTP: DataTypes.INTEGER
   }, {
     tableName: 'users',
     timestamps: true,
@@ -61,6 +90,11 @@ exports.default = function (sequelize, DataTypes) {
           foreignKey: 'createdBy',
           allowNull: true,
           as: 'CreatedBy'
+        });
+        User.belongsTo(User, {
+          foreignKey: 'resellerId',
+          allowNull: true,
+          as: 'ResellerId'
         });
       },
       checkEmailExists: function checkEmailExists(db, email) {

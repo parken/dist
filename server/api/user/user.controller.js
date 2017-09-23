@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
@@ -20,11 +16,17 @@ var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 exports.me = me;
+exports.meUpdate = meUpdate;
 exports.index = index;
 exports.show = show;
 exports.showUuid = showUuid;
 exports.create = create;
+exports.createEndUser = createEndUser;
 exports.createCustomer = createCustomer;
 exports.signup = signup;
 exports.googleLogin = googleLogin;
@@ -55,6 +57,8 @@ var _environment = require('../../config/environment');
 
 var _environment2 = _interopRequireDefault(_environment);
 
+var _constants = require('../../config/constants');
+
 var _logger = require('../../components/logger');
 
 var _logger2 = _interopRequireDefault(_logger);
@@ -73,12 +77,31 @@ var _sqldb2 = _interopRequireDefault(_sqldb);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var ADMIN = _constants.ROLES.ADMIN;
 function me(req, res, next) {
-  return _sqldb2.default.User.findById(req.user.id, {
-    attributes: ['mobile', 'email', 'name', 'id', 'roleId'],
+  if (req.query.fl && req.query.fl.includes('sign')) {
+    return _sqldb2.default.User.findById(req.user.id, { attributes: ['signature'], raw: true }).then(function (user) {
+      return res.json(user);
+    }).catch(next);
+  }
+
+  return _promise2.default.all([_sqldb2.default.User.findById(req.user.id, {
+    attributes: ['mobile', 'email', 'name', 'id', 'roleId', 'admin', 'companyName', 'companyAddress', 'supportName', 'supportMobile', 'supportEmail'],
     raw: 'true'
-  }).then(function (u) {
-    return res.json(u);
+  }), _sqldb2.default.Route.findAll()]).then(function (_ref) {
+    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
+        u = _ref2[0],
+        upstreams = _ref2[1];
+
+    return res.json((0, _assign2.default)(u, { upstreams: upstreams }));
+  }).catch(next);
+}
+
+function meUpdate(req, res, next) {
+  if (req.query.fl.includes('sign')) return next();
+
+  return _sqldb2.default.User.update({ signature: req.body.signature }, { where: { id: req.user.id } }).then(function (user) {
+    return res.json(user);
   }).catch(next);
 }
 
@@ -93,7 +116,8 @@ function index(req, res, next) {
 
 
   var options = {
-    attributes: fl ? fl.split(',') : ['id'],
+    where: {},
+    attributes: fl ? fl.split(',') : ['id', 'name'],
     limit: Number(limit),
     offset: Number(offset)
   };
@@ -109,10 +133,14 @@ function index(req, res, next) {
     }, {});
   }
 
-  return _promise2.default.all([_sqldb2.default.User.findAll(options), _sqldb2.default.User.count()]).then(function (_ref) {
-    var _ref2 = (0, _slicedToArray3.default)(_ref, 2),
-        users = _ref2[0],
-        numFound = _ref2[1];
+  if (req.user.roleId !== ADMIN) {
+    options.where.resellerId = req.user.id;
+  }
+
+  return _promise2.default.all([_sqldb2.default.User.findAll(options), _sqldb2.default.User.count()]).then(function (_ref3) {
+    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
+        users = _ref4[0],
+        numFound = _ref4[1];
 
     return res.json({ items: users, meta: { numFound: numFound } });
   }).catch(next);
@@ -124,6 +152,7 @@ function show(req, res, next) {
     case 2:
       {
         return _sqldb2.default.User.find({
+          attributes: ['id', 'name', 'email', 'mobile'],
           where: { id: req.params.id }
         }).then(function (data) {
           return res.json(data);
@@ -135,7 +164,7 @@ function show(req, res, next) {
           where: { id: req.params.id },
           attributes: ['id', 'name', 'email', 'mobile']
         }).then(function (data) {
-          return res.json(data);
+          return res.json(_.omit(data, ['password']));
         }).catch(next);
       }
   }
@@ -151,7 +180,7 @@ function showUuid(req, res, next) {
       required: true
     }]
   }).then(function (loginIdentifier) {
-    if (!loginIdentifier) return res.status(404).json({ message: 'Invalid Request' });
+    if (!loginIdentifier) return res.status(400).json({ message: 'Invalid Request' });
     return res.json(loginIdentifier.User);
   }).catch(next);
 }
@@ -160,9 +189,27 @@ function create(req, res, next) {
   var user = req.body;
   if (('' + user.mobile).length === 10) user.mobile = Number('91' + user.mobile);
   if (('' + user.supportMobile).length === 10) user.supportMobile = Number('91' + user.supportMobile);
-  user.roleId = user.roldeId || 2;
+  user.roleId = req.user.roleId + 1;
   user.createdBy = req.user.id;
+
+  if (req.user.roleId !== ADMIN) {
+    user.resellerId = req.user.resellerId || req.user.id;
+  }
+
   return _sqldb2.default.User.create(user).then(function (data) {
+    return res.json(data);
+  }).catch(next);
+}
+
+function createEndUser(req, res, next) {
+  var user = req.body;
+  user.roleId = 4;
+  user.createdBy = req.user.id;
+  user.otp = Math.floor(Math.random() * 90000) + 10000;
+  delete user.id;
+  return _sqldb2.default.User.find({ where: { email: user.email, createdBy: user.createdBy, roleId: user.roleId } }).then(function (data) {
+    return data ? _promise2.default.resolve(data) : _sqldb2.default.User.create(user);
+  }).then(function (data) {
     return res.json(data);
   }).catch(next);
 }
@@ -182,7 +229,7 @@ function createCustomer(req, res, next) {
 
 function signup(req, res, next) {
   var authorization = req.get('authorization');
-  if (!authorization) return res.status(404).json({ message: 'Unauthorized Access.' });
+  if (!authorization) return res.status(403).json({ message: 'Unauthorized Access.' });
 
   var _Buffer$from$toString = Buffer.from(authorization.split(' ')[1], 'base64').toString('ascii').split(':'),
       _Buffer$from$toString2 = (0, _slicedToArray3.default)(_Buffer$from$toString, 2),
@@ -190,7 +237,7 @@ function signup(req, res, next) {
       clientSecret = _Buffer$from$toString2[1];
 
   return _sqldb2.default.App.find({ attributes: ['id'], where: { clientId: clientId, clientSecret: clientSecret } }).then(function (app) {
-    if (!app) return res.status(500).json({ message: 'Invalid Authentication.' });
+    if (!app) return res.status(403).json({ message: 'Invalid Authentication.' });
     var _req$body = req.body,
         name = _req$body.name,
         email = _req$body.email,
@@ -221,7 +268,7 @@ function getApp(code) {
 
 function googleLogin(req, res, next) {
   var authorization = req.get('authorization');
-  if (!authorization) return res.status(404).json({ message: 'Unauthorized Access.' });
+  if (!authorization) return res.status(403).json({ message: 'Unauthorized Access.' });
 
   var _Buffer$from$toString3 = Buffer.from(authorization.split(' ')[1], 'base64').toString('ascii').split(':'),
       _Buffer$from$toString4 = (0, _slicedToArray3.default)(_Buffer$from$toString3, 2),
@@ -229,11 +276,11 @@ function googleLogin(req, res, next) {
       clientSecret = _Buffer$from$toString4[1];
 
   return _sqldb2.default.App.find({ attributes: ['id', 'clientId', 'clientSecret'], where: { clientId: clientId, clientSecret: clientSecret } }).then(function (app) {
-    if (!app) return res.status(500).json({ message: 'Invalid Authentication.' });
+    if (!app) return res.status(400).json({ message: 'Invalid Authentication.' });
     var email = req.body.email;
 
     return _sqldb2.default.User.find({ attributes: ['email', 'otp'], where: { email: email, appId: app.id } }).then(function (user) {
-      if (!user) return res.status(500).json({ message: 'user not found' });
+      if (!user) return res.status(400).json({ message: 'user not found' });
       var options = {
         method: 'POST',
         uri: '' + _environment2.default.OAUTH_SERVER + _environment2.default.OAUTH_ENDPOINT,
@@ -256,9 +303,7 @@ function googleLogin(req, res, next) {
         return res.json(data);
       });
     });
-  }).catch(function (err) {
-    return console.log(err);
-  });
+  }).catch(next);
 }
 
 function login(req, res, next) {
@@ -311,7 +356,7 @@ function refresh(req, res, next) {
       }
     };
     return _request2.default.post(options, function (err, apires, body) {
-      if (err) return res.status(500).send(err);
+      if (err) return next(err);
       return res.status(apires.statusCode).send(body);
     });
   });
@@ -352,10 +397,10 @@ function otpLogin(req, res, next) {
       mobile: req.body.username || req.body.mobile
     },
     attributes: ['id', 'otpStatus', 'otp', 'mobile']
-  }).then(function (_ref3) {
-    var _ref4 = (0, _slicedToArray3.default)(_ref3, 2),
-        user = _ref4[0],
-        newUser = _ref4[1];
+  }).then(function (_ref5) {
+    var _ref6 = (0, _slicedToArray3.default)(_ref5, 2),
+        user = _ref6[0],
+        newUser = _ref6[1];
 
     if (!user) {
       return res.status(400).json({
@@ -445,7 +490,7 @@ function passwordChange(req, res, next) {
 
 function sendLogin(req, res, next) {
   return _sqldb2.default.User.find({ where: { id: req.params.id } }).then(function (user) {
-    if (!user) return res.status(404).end();
+    if (!user) return res.status(400).end();
     var otp = user.otpStatus === 1 && user.otp ? user.otp : Math.floor(Math.random() * 90000) + 10000;
 
     var text = 'Your account has been created click on the link to login ' + req.origin + '/home?otp=' + otp + '&id=' + user.mobile;
@@ -469,7 +514,7 @@ function addSellingRootUser(req, res, next) {
       limit = _req$body2.limit;
 
   if (!userId || !routeId || !limit || req.user.roleId !== 1) {
-    return res.status(404).json({ message: 'Invalid Request.' });
+    return res.status(400).json({ message: 'Invalid Request.' });
   }
   return _sqldb2.default.Selling.create({ userId: userId,
     routeId: routeId,
@@ -489,10 +534,10 @@ function addSelling(req, res, next) {
       fromUserId = _req$body3.fromUserId;
 
   if (!userId || !sendingUserId || !routeId || !limit) {
-    return res.status(404).json({ message: 'Invalid Request.' });
+    return res.status(400).json({ message: 'Invalid Request.' });
   }
   if (req.user['sellingBalance' + (0, _helper.getRouteType)(routeId)] < limit) {
-    return res.status(404).json({ message: 'Limit Exceeded.' });
+    return res.status(400).json({ message: 'Limit Exceeded.' });
   }
   return _sqldb2.default.Selling.create({ userId: userId,
     sendingUserId: sendingUserId,

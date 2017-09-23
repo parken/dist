@@ -32,8 +32,8 @@ exports.default = function (a) {
     if (req.headers.origin) req.origin = req.headers.origin.split('://')[1];
     next();
   });
-
-  (0, _express4.default)(app, routes);
+  (0, _express4.default)(app);
+  (0, _express6.default)(app, routes);
   // errors passed using next(err)
   app.use(function (e, req, res, next) {
     var err = e;
@@ -160,18 +160,23 @@ var _setup = require('../components/setup');
 
 var setup = _interopRequireWildcard(_setup);
 
-var _express3 = require('./../components/oauth/express');
+var _express3 = require('./../components/feed/express');
 
 var _express4 = _interopRequireDefault(_express3);
+
+var _express5 = require('./../components/oauth/express');
+
+var _express6 = _interopRequireDefault(_express5);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var log = (0, _debug2.default)('server/config');
-
-/* eslint consistent-return:0 */
 /**
  * Express configuration
  */
+
+var log = (0, _debug2.default)('server/config');
+
+/* eslint consistent-return:0 */
 //# sourceMappingURL=express.js.map

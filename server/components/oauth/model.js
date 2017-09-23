@@ -65,14 +65,17 @@ var model = {
       attributes: ['accessToken', 'expires', ['sessionId', 'session_id']],
       include: [{
         model: _sqldb2.default.User,
-        attributes: ['id', 'name', 'roleId']
+        attributes: ['id', 'name', 'roleId', 'admin', 'resellerId', 'sellingBalanceTransactional', 'sendingBalanceTransactional', 'sellingBalancePromotional', 'sendingBalancePromotional', 'sellingBalanceSenderId', 'sendingBalanceSenderId', 'sellingBalanceOTP', 'sendingBalanceOTP']
       }]
     }).then(function (accessToken) {
       if (!accessToken) return callback(null, false);
       var token = accessToken.toJSON();
       token.user = token.User;
-      return callback(null, token);
-    }).catch(callback);
+      callback(null, token);
+      return accessToken;
+    }).catch(function (err) {
+      return callback(err);
+    });
   },
 
 
@@ -197,6 +200,7 @@ var model = {
         return callback(null, verifiedUser);
       });
     }).catch(function (err) {
+      console.log('sssssssssssssssss', err);
       callback(null, false, err);
     });
   },

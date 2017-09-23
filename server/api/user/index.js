@@ -14,6 +14,7 @@ var router = express.Router();
 router.get('/', _auth2.default, controller.index);
 
 router.get('/me', _auth2.default, controller.me);
+router.post('/me', _auth2.default, controller.meUpdate);
 router.get('/duplicate', controller.duplicate);
 router.get('/checkExists', controller.checkExists);
 router.get('/uuid/:uuid', controller.showUuid);
@@ -22,6 +23,7 @@ router.get('/:id/sendLogin', _auth2.default, controller.sendLogin);
 
 router.post('/', _auth2.default, controller.create);
 router.post('/signup', controller.signup);
+router.post('/endUser', _auth2.default, controller.createEndUser);
 router.post('/customer', _auth2.default, controller.createCustomer);
 router.post('/login', controller.login);
 router.post('/googleLogin', controller.googleLogin);

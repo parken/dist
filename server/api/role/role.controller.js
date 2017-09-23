@@ -93,7 +93,7 @@ function update(req, res, next) {
 }
 
 function destroy(req, res, next) {
-  return _sqldb2.default.Role.destory({ where: { id: req.params.id } }).then(function () {
+  return _sqldb2.default.Role.destroy({ where: { id: req.params.id } }).then(function () {
     return res.status(201).end();
   }).catch(next);
 }

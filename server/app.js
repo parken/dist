@@ -1,9 +1,5 @@
 'use strict';
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
@@ -32,15 +28,19 @@ var _routes = require('./routes');
 
 var _routes2 = _interopRequireDefault(_routes);
 
+var _smsManager = require('./components/smsManager');
+
+var _smsManager2 = _interopRequireDefault(_smsManager);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* eslint no-console:0 */
-var log = console.log;
-// Setup server
 /**
  * Main application file
  */
 
+var log = console.log;
+// Setup server
 var app = (0, _express2.default)();
 var server = _http2.default.createServer(app);
 var socketio = (0, _socket2.default)(server, {
@@ -58,7 +58,7 @@ function startServer() {
   });
 }
 
-_promise2.default.resolve().then(function () {
+_smsManager2.default.addPendingMessagesToQueue().then(function () {
   return startServer();
 }).catch(function (err) {
   console.log(err);
